@@ -8,6 +8,8 @@
 
 /* Begin PBXBuildFile section */
 		699A00472B147E1D00E9B260 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 699A00462B147E1D00E9B260 /* main.cpp */; };
+		699A004F2B147E4C00E9B260 /* OpenGL.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 699A004E2B147E4C00E9B260 /* OpenGL.framework */; };
+		699A00512B147E5300E9B260 /* GLUT.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 699A00502B147E5300E9B260 /* GLUT.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -25,6 +27,8 @@
 /* Begin PBXFileReference section */
 		699A00432B147E1D00E9B260 /* FlappyBirdProj */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FlappyBirdProj; sourceTree = BUILT_PRODUCTS_DIR; };
 		699A00462B147E1D00E9B260 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		699A004E2B147E4C00E9B260 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
+		699A00502B147E5300E9B260 /* GLUT.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GLUT.framework; path = System/Library/Frameworks/GLUT.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +36,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				699A00512B147E5300E9B260 /* GLUT.framework in Frameworks */,
+				699A004F2B147E4C00E9B260 /* OpenGL.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -43,6 +49,7 @@
 			children = (
 				699A00452B147E1D00E9B260 /* FlappyBirdProj */,
 				699A00442B147E1D00E9B260 /* Products */,
+				699A004D2B147E4C00E9B260 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -60,6 +67,15 @@
 				699A00462B147E1D00E9B260 /* main.cpp */,
 			);
 			path = FlappyBirdProj;
+			sourceTree = "<group>";
+		};
+		699A004D2B147E4C00E9B260 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				699A00502B147E5300E9B260 /* GLUT.framework */,
+				699A004E2B147E4C00E9B260 /* OpenGL.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
