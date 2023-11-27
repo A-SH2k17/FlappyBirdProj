@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <GLUT/GLUT.h>
+using namespace std;
 
 // Define window dimensions
 const int windowWidth = 800;
@@ -26,8 +27,13 @@ float pipeGaps[numPipes] = {0.0f};
 
 int score = 0;
 bool gameEnded = false;
+int window;
 
-
+void myinit(){
+    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+    glutInitWindowSize(windowWidth, windowHeight);
+    window = glutCreateWindow("Flappy Bird");
+}
 void initializePipes() {
     const float totalPipeWidth = numPipes * pipeWidth + (numPipes - 1) * pipeSpacing;
     const float initialX = windowWidth + totalPipeWidth / 5.0f;
@@ -36,7 +42,7 @@ void initializePipes() {
         pipes[i] = initialX + i * (pipeWidth + pipeSpacing);
 
         // Set random gap positions for each pipe
-        pipeGaps[i] = rand() % static_cast<int>(windowHeight * 0.3f) + windowHeight * 0.2f;
+        pipeGaps[i] = rand() % (int)(windowHeight * 0.3f) + windowHeight * 0.2f;
     }
 }
 
@@ -46,13 +52,13 @@ void drawScore() {
     glRasterPos2f(windowWidth - 100, windowHeight - 20);
 
     // Draw "Score: "
-    std::string scoreText = "Score: ";
+    string scoreText = "Score: ";
     for (char character : scoreText) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
 
     // Convert the score to a string to draw each digit separately
-    std::string scoreStr = std::to_string(score);
+    string scoreStr = to_string(score);
     for (char digit : scoreStr) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, digit);
     }
@@ -164,18 +170,21 @@ void keyboard(unsigned char key, int x, int y) {
     else if ((key == 'r' || key == 'R') && gameEnded) {
         restartGame();
     }
-
+    else if(key=='q' || key =='Q'){
+        glutDestroyWindow(window);
+        exit(0);
+    }
 }
 
 
 void drawGround() {
-    glColor3f(0.5f, 0.5f, 0.5f);  // Gray color for the ground
+    glColor3f(0.0, 1, 0);  // Gray color for the ground
     drawRectangle(0.0f, 0.0f, windowWidth, 10.0f);
 }
 
 void drawScene() {
     glClear(GL_COLOR_BUFFER_BIT);
-
+    glClearColor(0.05, 0.78, 0.98, 1);
     drawGround();
     drawBird();
 
@@ -194,10 +203,7 @@ void drawScene() {
 
 int main(int argc, char** argv) {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
-    glutInitWindowSize(windowWidth, windowHeight);
-    glutCreateWindow("Flappy Bird");
-
+    myinit();
     glOrtho(0.0, windowWidth, 0.0, windowHeight, -10.0, 10.0);
     glutDisplayFunc(drawScene);
     glutIdleFunc(update);
