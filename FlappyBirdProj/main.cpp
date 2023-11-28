@@ -2,6 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <GLUT/GLUT.h>
+#include <vector>
 using namespace std;
 
 // Define window dimensions
@@ -24,12 +25,15 @@ bool inStartMenu = true;
 
 
 // Pipe parameters
-const int numPipes = 3;
+const int numPipes = 5;
 float pipeWidth = 50.0f;
 float pipeHeight = 300.0f;
-const float pipeSpacing = 500.0f; // Increase the value as needed
+float pipeSpacing = 500.0f; // Increase the value as needed (!!)
+/*
+ -A- it would be better if we decreased the spacing as the level increase to make the level more challenging and decreae the number of p
+ */
 // -M- velocity increases for each level
-float pipeVelocity = 5.0f + 0.5f * currentLevel;
+float pipeVelocity = 5.0f; //-A-Initial pipe velocity won't be affected update shoud be after passing
 float pipes[numPipes] = {0.0f};
 float pipeGaps[numPipes] = {0.0f};
 
@@ -37,6 +41,7 @@ int score = 0;
 bool gameEnded = false;
 int window;
 
+//-A- Creatd the my init function
 void myinit(){
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(windowWidth, windowHeight);
@@ -59,6 +64,12 @@ void drawStartMenu() {
     glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2 - 100);
     startText = "Press ENTER to start";
     for (char character : startText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+    }
+    //-A- Added the press q to quit
+    glRasterPos2f(windowWidth/2 -100, windowHeight/2-150);
+    string quitText = "Press Q to quit";
+    for (char character:quitText){
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
 }
@@ -89,6 +100,18 @@ void drawScore() {
     string scoreStr = to_string(score);
     for (char digit : scoreStr) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, digit);
+    }
+}
+void showLevel(){
+    glColor3f(1, 1, 1);
+    glRasterPos2f(windowWidth-100, windowHeight-50);
+    string text_to_show = "Level: ";
+    for (char character : text_to_show){
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+    }
+    text_to_show = to_string(currentLevel);
+    for (char character : text_to_show){
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
 }
 
@@ -131,6 +154,14 @@ float drawPipe(float x, float gapY) {
     return gapHeight;
 }
 
+//-A- Added Function to adjust the game based on the level
+void updateLevel(){
+    currentLevel++;
+    initializePipes();
+    pipeVelocity = 5.0f +  currentLevel;
+    score = 0; //-A-reset Score since we started a new level
+    targetScore += 5;  //add more pipes to complete the level
+}
 // Function to update the game state
 void update() {
     if (!gameEnded) {
@@ -163,7 +194,7 @@ void update() {
                     }
                 }
             }
-
+            
             // If a pipe goes off-screen, reset its position and increase the score
             if (pipes[i] + pipeWidth < birdX - birdRadius) {
                 pipes[i] = windowWidth;
@@ -171,10 +202,7 @@ void update() {
                 cout << "Score: " << score << " | Level: " << currentLevel << endl;
                 // -M- if the player passed the level
                 if (score >= targetScore) {
-                    currentLevel++;
-                    initializePipes();
-                    pipeVelocity = 5.0f + 0.5f * currentLevel;
-                    targetScore += 5;  //add more pipes to complete the level
+                    updateLevel();
                     cout << "Level Up! Now on Level " << currentLevel << endl;
                 }
             }
@@ -241,6 +269,7 @@ void drawScene() {
             }
             
             drawScore();  // Draw the score
+            showLevel(); //indicates which level the user in on
         }
     }
 
