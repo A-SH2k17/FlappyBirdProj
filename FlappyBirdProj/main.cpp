@@ -2,7 +2,7 @@
 #include <cstdlib>
 #include <cmath>
 #include <GLUT/GLUT.h>
-#include <vector>
+#include "stb_images.h"
 using namespace std;
 
 // Define window dimensions
@@ -11,12 +11,17 @@ const int windowHeight = 1000;
 
 // Bird parameters
 float birdX = 100.0f;
-float birdY = windowHeight / 2.0f;
+float birdY = windowHeight / 2.0f + 30;
 float birdRadius = 20.0f;
 float birdVelocity = 0.0f;
 float gravity = 0.5f;
 float jumpForce = 10.0f;
 
+// -N- background cloud parameter
+const int numClouds = 3;
+float cloudRadius = 40.0f;
+float cloudSpacing = 300.0f;
+float clouds[numClouds] = { 0.0f };
 
 // -M- Level variables
 int currentLevel = 1;
@@ -25,12 +30,12 @@ bool inStartMenu = true;
 
 
 // Pipe parameters
-const int numPipes = 5;
+const int numPipes = 4;
 float pipeWidth = 50.0f;
 float pipeHeight = 300.0f;
-float pipeSpacing = 500.0f; // Increase the value as needed (!!)
+float pipeSpacing = 150.0f; // Increase the value as needed
 /*
- -A- it would be better if we decreased the spacing as the level increase to make the level more challenging and decreae the number of p
+ -A- it would be better if we decreased the spacing as the level increase to make the level more challenging
  */
 // -M- velocity increases for each level
 float pipeVelocity = 5.0f; //-A-Initial pipe velocity won't be affected update shoud be after passing
@@ -76,7 +81,7 @@ void drawStartMenu() {
 
 void initializePipes() {
     const float totalPipeWidth = numPipes * pipeWidth + (numPipes - 1) * pipeSpacing;
-    const float initialX = windowWidth + totalPipeWidth / 5.0f;
+    const float initialX = windowWidth;
 
     for (int i = 0; i < numPipes; ++i) {
         pipes[i] = initialX + i * (pipeWidth + pipeSpacing);
@@ -144,6 +149,16 @@ void drawBird() {
     drawCircle(birdX, birdY, birdRadius);
 }
 
+//-N- Function to draw the cloud
+void drawCloud(float x, float y) {
+    glColor3f(1.0f, 1.0f, 1.0f);  // White color for the clouds
+
+    // Draw multiple circles to create a cloud shape
+    for (int i = 0; i < 3; ++i) {
+        drawCircle(x + i * 30.0f, y, cloudRadius);
+    }
+}
+
 float drawPipe(float x, float gapY) {
     float gapHeight = windowHeight * 0.3f; // You can adjust this value as needed
     glColor3f(0.0f, 1.0f, 0.0f);  // Green color
@@ -165,6 +180,14 @@ void updateLevel(){
 // Function to update the game state
 void update() {
     if (!gameEnded) {
+        // Update cloud positions
+        for (int i = 0; i < numClouds; ++i) {
+            clouds[i] -= pipeVelocity;
+        // If a cloud goes off-screen, reset its position
+            if (clouds[i] + cloudRadius < 0) {
+                clouds[i] = windowWidth + i * cloudSpacing;
+            }
+        }
         // Update bird position based on velocity
         birdY += birdVelocity;
 
@@ -245,8 +268,8 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void drawGround() {
-    glColor3f(0.0, 1, 0);  // Gray color for the ground
-    drawRectangle(0.0f, 0.0f, windowWidth, 10.0f);
+    glColor3f(0, 0, 0);  // Gray color for the ground
+    drawRectangle(0.0f, 0.0f, windowWidth, 100.0f);
 }
 
 void drawScene() {
@@ -263,6 +286,11 @@ void drawScene() {
             drawGround();
             drawBird();
             
+            // Draw clouds in the background
+            for (int i = 0; i < numClouds; ++i) {
+                drawCloud(clouds[i], windowHeight - 100);
+            }
+            
             // Draw pipes with gaps
             for (int i = 0; i < numPipes; ++i) {
                 drawPipe(pipes[i], pipeGaps[i]);
@@ -274,6 +302,7 @@ void drawScene() {
     }
 
     glutSwapBuffers();
+    glFlush();
 }
 
 int main(int argc, char** argv) {

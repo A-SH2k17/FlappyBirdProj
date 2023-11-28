@@ -25,6 +25,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		697D0D942B166A0C00E4E596 /* stb_images.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = stb_images.h; sourceTree = "<group>"; };
 		699A00432B147E1D00E9B260 /* FlappyBirdProj */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = FlappyBirdProj; sourceTree = BUILT_PRODUCTS_DIR; };
 		699A00462B147E1D00E9B260 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		699A004E2B147E4C00E9B260 /* OpenGL.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = OpenGL.framework; path = System/Library/Frameworks/OpenGL.framework; sourceTree = SDKROOT; };
@@ -65,6 +66,7 @@
 			isa = PBXGroup;
 			children = (
 				699A00462B147E1D00E9B260 /* main.cpp */,
+				697D0D942B166A0C00E4E596 /* stb_images.h */,
 			);
 			path = FlappyBirdProj;
 			sourceTree = "<group>";
