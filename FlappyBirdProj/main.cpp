@@ -16,6 +16,8 @@ float birdVelocity = 0.0f;
 float gravity = 0.5f;
 float jumpForce = 10.0f;
 
+
+// -M- Level variables
 int currentLevel = 1;
 int targetScore = 5;//num of pipes passed to complete the level
 bool inStartMenu = true;
@@ -26,6 +28,7 @@ const int numPipes = 3;
 float pipeWidth = 50.0f;
 float pipeHeight = 300.0f;
 const float pipeSpacing = 500.0f; // Increase the value as needed
+// -M- velocity increases for each level
 float pipeVelocity = 5.0f + 0.5f * currentLevel;
 float pipes[numPipes] = {0.0f};
 float pipeGaps[numPipes] = {0.0f};
@@ -40,6 +43,7 @@ void myinit(){
     window = glutCreateWindow("Flappy Bird");
 }
 
+// -M- Added A start Menu
 void drawStartMenu() {
     glColor3f(1.0, 1.0, 1.0);
     glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2);
@@ -162,10 +166,10 @@ void update() {
 
             // If a pipe goes off-screen, reset its position and increase the score
             if (pipes[i] + pipeWidth < birdX - birdRadius) {
-                                pipes[i] = windowWidth;
+                pipes[i] = windowWidth;
                 score++;
                 cout << "Score: " << score << " | Level: " << currentLevel << endl;
-
+                // -M- if the player passed the level
                 if (score >= targetScore) {
                     currentLevel++;
                     initializePipes();
@@ -192,6 +196,7 @@ void restartGame() {
 }
 
 void keyboard(unsigned char key, int x, int y) {
+    // -M- for start menu
     if (inStartMenu) {
         if (key == 13) {//Enter in ASCII
             inStartMenu = false;
