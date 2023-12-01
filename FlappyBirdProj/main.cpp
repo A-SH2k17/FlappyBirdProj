@@ -25,9 +25,8 @@ float clouds[numClouds] = { 0.0f };
 
 // -M- Level variables
 int currentLevel = 1;
-int targetScore = 5;//num of pipes passed to complete the level
+int targetScore = 1; // num of pipes passed to complete the level
 bool inStartMenu = true;
-
 
 // Pipe parameters
 const int numPipes = 4;
@@ -46,8 +45,12 @@ int score = 0;
 bool gameEnded = false;
 int window;
 
-//-A- Creatd the my init function
-void myinit(){
+bool levelCompleted = false;
+bool showLevelMenu = false;
+bool showLevelMessage = false;
+bool gamePaused = false;
+//-A- Created the my init function
+void myinit() {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(windowWidth, windowHeight);
     window = glutCreateWindow("Flappy Bird");
@@ -72,9 +75,9 @@ void drawStartMenu() {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
     //-A- Added the press q to quit
-    glRasterPos2f(windowWidth/2 -100, windowHeight/2-150);
+    glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2 - 150);
     string quitText = "Press Q to quit";
-    for (char character:quitText){
+    for (char character : quitText) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
 }
@@ -92,7 +95,7 @@ void initializePipes() {
 }
 
 void drawScore() {
-    glColor3f(1.0f, 1.0f, 1.0f);  // White color for the score
+    glColor3f(1.0f, 1.0f, 1.0f); // White color for the score
     glRasterPos2f(windowWidth - 100, windowHeight - 20);
 
     // Draw "Score: "
@@ -107,15 +110,15 @@ void drawScore() {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, digit);
     }
 }
-void showLevel(){
+void showLevel() {
     glColor3f(1, 1, 1);
-    glRasterPos2f(windowWidth-100, windowHeight-50);
+    glRasterPos2f(windowWidth - 100, windowHeight - 50);
     string text_to_show = "Level: ";
-    for (char character : text_to_show){
+    for (char character : text_to_show) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
     text_to_show = to_string(currentLevel);
-    for (char character : text_to_show){
+    for (char character : text_to_show) {
         glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
     }
 }
@@ -145,13 +148,13 @@ void drawRectangle(float x, float y, float width, float height) {
 
 // Function to draw the bird
 void drawBird() {
-    glColor3f(1.0f, 1.0f, 0.0f);  // Yellow color
+    glColor3f(1.0f, 1.0f, 0.0f); // Yellow color
     drawCircle(birdX, birdY, birdRadius);
 }
 
 //-N- Function to draw the cloud
 void drawCloud(float x, float y) {
-    glColor3f(1.0f, 1.0f, 1.0f);  // White color for the clouds
+    glColor3f(1.0f, 1.0f, 1.0f); // White color for the clouds
 
     // Draw multiple circles to create a cloud shape
     for (int i = 0; i < 3; ++i) {
@@ -161,7 +164,7 @@ void drawCloud(float x, float y) {
 
 float drawPipe(float x, float gapY) {
     float gapHeight = windowHeight * 0.3f; // You can adjust this value as needed
-    glColor3f(0.0f, 1.0f, 0.0f);  // Green color
+    glColor3f(0.0f, 1.0f, 0.0f);          // Green color
     // Top pipe
     drawRectangle(x, gapY + gapHeight, pipeWidth, windowHeight - gapY - gapHeight);
     // Bottom pipe
@@ -170,20 +173,22 @@ float drawPipe(float x, float gapY) {
 }
 
 //-A- Added Function to adjust the game based on the level
-void updateLevel(){
+void updateLevel() {
     currentLevel++;
     initializePipes();
-    pipeVelocity = 5.0f +  currentLevel;
-    score = 0; //-A-reset Score since we started a new level
-    targetScore += 5;  //add more pipes to complete the level
+    pipeVelocity = 5.0f + currentLevel;
+    score = 0;           //-A-reset Score since we started a new level
+    targetScore += 1;     // add more pipes to complete the level
+    levelCompleted = false;
+    showLevelMenu = false;
 }
 // Function to update the game state
 void update() {
-    if (!gameEnded) {
+    if (!gameEnded && !gamePaused) {
         // Update cloud positions
         for (int i = 0; i < numClouds; ++i) {
             clouds[i] -= pipeVelocity;
-        // If a cloud goes off-screen, reset its position
+            // If a cloud goes off-screen, reset its position
             if (clouds[i] + cloudRadius < 0) {
                 clouds[i] = windowWidth + i * cloudSpacing;
             }
@@ -217,23 +222,33 @@ void update() {
                     }
                 }
             }
-            
+
             // If a pipe goes off-screen, reset its position and increase the score
             if (pipes[i] + pipeWidth < birdX - birdRadius) {
                 pipes[i] = windowWidth;
                 score++;
                 cout << "Score: " << score << " | Level: " << currentLevel << endl;
+
                 // -M- if the player passed the level
                 if (score >= targetScore) {
-                    updateLevel();
-                    cout << "Level Up! Now on Level " << currentLevel << endl;
+                    levelCompleted = true;
+                    showLevelMessage = true;
+                    birdX = 100.0f;
+                    birdY = windowHeight / 2.0f + 30;
                 }
             }
         }
 
-        glutPostRedisplay();  // Request a redraw
+        // -A- Check for level completion and update accordingly
+        if (levelCompleted) {
+                    gamePaused = true;
+                    showLevelMessage = true;
+                }
+
+        glutPostRedisplay(); // Request a redraw
     }
 }
+
 
 void restartGame() {
     birdY = windowHeight / 2.0f;
@@ -244,60 +259,103 @@ void restartGame() {
     targetScore = 5;
     initializePipes();
     pipeVelocity = 5.0f + 0.5f * currentLevel;
+    levelCompleted = false;
+    showLevelMenu = false;
+}
+
+// Function to draw the level completion menu
+void drawLevelMenu() {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(windowWidth / 2 - 150, windowHeight / 2);
+    string levelCompleteText = "Level " + to_string(currentLevel) + " Completed!";
+    for (char character : levelCompleteText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+    }
+    glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2 - 50);
+    string nextLevelText = "Press N for the next level";
+    for (char character : nextLevelText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+    }
 }
 
 void keyboard(unsigned char key, int x, int y) {
-    // -M- for start menu
     if (inStartMenu) {
-        if (key == 13) {//Enter in ASCII
+        if (key == 13) { // Enter in ASCII
             inStartMenu = false;
         }
-    }
-    else{
-        if (key == ' ' && !gameEnded) {
+    } else {
+        if (key == ' ' && !gameEnded && !gamePaused) {
             birdVelocity = jumpForce;
         } else if ((key == 'r' || key == 'R') && gameEnded) {
             restartGame();
         } else if (key == 'q' || key == 'Q') {
             glutDestroyWindow(window);
             exit(0);
+        } else if (key == 'n' || key == 'N') {
+            if (showLevelMessage && gamePaused) {
+                // Move to the next level
+                showLevelMessage = false;
+                levelCompleted = false;
+                updateLevel();
+                gamePaused = false; // Resume the game after moving to the next level
+                birdX = 100.0f;
+                birdY = windowHeight / 2.0f + 30;
+            }
         } else if (key == 13 && gameEnded) {
             restartGame();
         }
     }
 }
 
+
+
 void drawGround() {
-    glColor3f(0, 0, 0);  // Gray color for the ground
+    glColor3f(0, 0, 0); // Gray color for the ground
     drawRectangle(0.0f, 0.0f, windowWidth, 100.0f);
 }
+
 
 void drawScene() {
     glClear(GL_COLOR_BUFFER_BIT);
     glClearColor(0.05, 0.78, 0.98, 1);
-    
+
     if (inStartMenu) {
         drawStartMenu();
-    }
-    else{
+    } else {
         if (gameEnded) {
             drawStartMenu();
         } else {
             drawGround();
             drawBird();
-            
+
             // Draw clouds in the background
             for (int i = 0; i < numClouds; ++i) {
                 drawCloud(clouds[i], windowHeight - 100);
             }
-            
+
             // Draw pipes with gaps
             for (int i = 0; i < numPipes; ++i) {
                 drawPipe(pipes[i], pipeGaps[i]);
             }
-            
-            drawScore();  // Draw the score
-            showLevel(); //indicates which level the user in on
+
+            drawScore(); // Draw the score
+            showLevel(); // Indicates which level the user is on
+
+            // Draw the level completion message if necessary
+            if (showLevelMessage) {
+                glColor3f(1.0, 1.0, 1.0);
+                glRasterPos2f(windowWidth / 2 - 150, windowHeight / 2);
+                string levelPassText = "You passed Level " + to_string(currentLevel) + "!";
+                for (char character : levelPassText) {
+                    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+                }
+                glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2 - 50);
+                string nextLevelText = "Press N for the next level";
+                for (char character : nextLevelText) {
+                    glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+                }
+                gamePaused = true; // Pause the game after showing the level completion message
+            }
         }
     }
 
@@ -325,4 +383,3 @@ int main(int argc, char** argv) {
 
     return 0;
 }
-
