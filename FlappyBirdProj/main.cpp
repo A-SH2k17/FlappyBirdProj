@@ -25,7 +25,7 @@ float clouds[numClouds] = { 0.0f };
 
 // -M- Level variables
 int currentLevel = 1;
-int targetScore = 1; // num of pipes passed to complete the level
+int targetScore = 5; // num of pipes passed to complete the level
 bool inStartMenu = true;
 
 // Pipe parameters
@@ -48,7 +48,9 @@ int window;
 bool levelCompleted = false;
 bool showLevelMenu = false;
 bool showLevelMessage = false;
-bool gamePaused = false;
+bool gamePaused = true;
+int pauseMenu;
+
 //-A- Created the my init function
 void myinit() {
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
@@ -93,6 +95,16 @@ void initializePipes() {
         pipeGaps[i] = rand() % (int)(windowHeight * 0.3f) + windowHeight * 0.2f;
     }
 }
+
+void drawPauseMenu() {
+    glColor3f(1.0, 1.0, 1.0);
+    glRasterPos2f(windowWidth / 2 - 100, windowHeight / 2);
+    string pauseText = "Game Paused";
+    for (char character : pauseText) {
+        glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
+    }
+}
+
 
 void drawScore() {
     glColor3f(1.0f, 1.0f, 1.0f); // White color for the score
@@ -182,7 +194,7 @@ void updateLevel() {
     levelCompleted = false;
     showLevelMenu = false;
 }
-// Function to update the game state
+
 void update() {
     if (!gameEnded && !gamePaused) {
         // Update cloud positions
@@ -241,11 +253,14 @@ void update() {
 
         // -A- Check for level completion and update accordingly
         if (levelCompleted) {
-                    gamePaused = true;
-                    showLevelMessage = true;
-                }
+            gamePaused = true;
+            showLevelMessage = true;
+        }
 
         glutPostRedisplay(); // Request a redraw
+    }
+    else if(gamePaused && !gameEnded && !showLevelMessage){
+        drawPauseMenu();
     }
 }
 
@@ -282,28 +297,59 @@ void keyboard(unsigned char key, int x, int y) {
     if (inStartMenu) {
         if (key == 13) { // Enter in ASCII
             inStartMenu = false;
+            gamePaused = false;
+            gameEnded = false;
         }
     } else {
-        if (key == ' ' && !gameEnded && !gamePaused) {
-            birdVelocity = jumpForce;
-        } else if ((key == 'r' || key == 'R') && gameEnded) {
-            restartGame();
-        } else if (key == 'q' || key == 'Q') {
-            glutDestroyWindow(window);
-            exit(0);
-        } else if (key == 'n' || key == 'N') {
-            if (showLevelMessage && gamePaused) {
-                // Move to the next level
-                showLevelMessage = false;
-                levelCompleted = false;
-                updateLevel();
-                gamePaused = false; // Resume the game after moving to the next level
-                birdX = 100.0f;
-                birdY = windowHeight / 2.0f + 30;
-            }
-        } else if (key == 13 && gameEnded) {
-            restartGame();
+        switch (key) {
+            case ' ':
+                // Handle space key for jumping
+                if (!gameEnded && !gamePaused) {
+                    birdVelocity = jumpForce;
+                }
+                break;
+            case 'p':
+            case 'P':
+                // Handle 'P' key for pausing the game
+                if (!gameEnded && !showLevelMessage) {
+                    gamePaused = !gamePaused;
+                }
+                break;
+            case 'r':
+            case 'R':
+                // Handle 'R' key for restarting the game
+                if (gameEnded) {
+                    restartGame();
+                }
+                break;
+            case 'q':
+            case 'Q':
+                // Handle 'Q' key for quitting the game
+                glutDestroyWindow(window);
+                exit(0);
+                break;
+            case 'n':
+            case 'N':
+                // Handle 'N' key for moving to the next level
+                if (showLevelMessage) {
+                    showLevelMessage = false;
+                    levelCompleted = false;
+                    updateLevel();
+                    gamePaused = false;
+                    birdX = 100.0f;
+                    birdY = windowHeight / 2.0f + 30;
+                }
+                break;
+            case 13: // Enter key
+                // Handle Enter key if the game has ended
+                if (gameEnded) {
+                    restartGame();
+                }
+                break;
+            default:
+                break;
         }
+        glutPostRedisplay(); // Request a redraw
     }
 }
 
@@ -355,6 +401,9 @@ void drawScene() {
                     glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, character);
                 }
                 gamePaused = true; // Pause the game after showing the level completion message
+            }
+            if (gamePaused && !showLevelMessage) {
+                drawPauseMenu();
             }
         }
     }
